@@ -1,60 +1,100 @@
 #include <nmmintrin.h>
+#include <string.h>
+
+#define STRIDE 4
 
 void sgemm( int m, int n, int d, float *A, float *C )
 {
-  __m128 a2_1, a2_2, a2_3, a2_4,a2_5, a2_6,a1, c;
+  
   if(n == 40 && m == 48 ){
+    
+    __m128 a2_1, a2_2, a2_3, a2_4,a2_5, a2_6, a1, c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8;
+    register int k,j,i;
       
-    for( int k = 0; k < m; k++ ){ 
-      for( int j = 0; j < n; j+=4 ){
+    for( k = 0; k < m; k++ ){ 
+      for( j = 0; j < n; j+=4 ){
 	 a2_1 = _mm_load1_ps(A+j*(n+1)+k*(n));
 	 a2_2 = _mm_load1_ps(A+(j+1)*(n+1)+k*(n));
 	 a2_3 = _mm_load1_ps(A+(j+2)*(n+1)+k*(n));
 	 a2_4 = _mm_load1_ps(A+(j+3)*(n+1)+k*(n));
-	 for( int i = 0; i < n; i+=8 ){
+	 for( i = 0; i < n; i+=8 ){
 	  
 	  a1 = _mm_loadu_ps(A+i+k*(n)); 
 	  
-	  c = _mm_loadu_ps(C+i+j*(n));
-	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_1));
-	  _mm_storeu_ps(C+i+j*(n), c);
-	  
-	  c = _mm_loadu_ps(C+i+(j+1)*(n));
-	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_2));
-	  _mm_storeu_ps(C+i+(j+1)*(n), c);
-	  
-	  c = _mm_loadu_ps(C+i+(j+2)*(n));
-	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_3));
-	  _mm_storeu_ps(C+i+(j+2)*(n), c);
-	  
-	  c = _mm_loadu_ps(C+i+(j+3)*(n));
-	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_4));
-	  _mm_storeu_ps(C+i+(j+3)*(n), c);
+	  c_1 = _mm_loadu_ps(C+i+j*(n));
+	  c_1 = _mm_add_ps(c_1, _mm_mul_ps(a1, a2_1));
 	  
 	  
-	  a1 = _mm_loadu_ps(A+i+4+k*(n)); 
-	  c = _mm_loadu_ps(C+i+4+j*(n));
-	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_1));
-	  _mm_storeu_ps(C+i+4+j*(n), c);
+	  c_2 = _mm_loadu_ps(C+i+(j+1)*(n));
+	  c_2 = _mm_add_ps(c_2, _mm_mul_ps(a1, a2_2));
+	  _mm_storeu_ps(C+i+j*(n), c_1);
+	  _mm_storeu_ps(C+i+(j+1)*(n), c_2);
+	  
+	  c_3 = _mm_loadu_ps(C+i+(j+2)*(n));
+	  c_3 = _mm_add_ps(c_3, _mm_mul_ps(a1, a2_3));
+	  
+	  
+	  c_4 = _mm_loadu_ps(C+i+(j+3)*(n));
+	  c_4 = _mm_add_ps(c_4, _mm_mul_ps(a1, a2_4));
+	  _mm_storeu_ps(C+i+(j+2)*(n), c_3);
+	  _mm_storeu_ps(C+i+(j+3)*(n), c_4);
+	  
+	  
+	  a1 = _mm_loadu_ps(A+i+4+k*(n));
+	  
+	  c_5 = _mm_loadu_ps(C+i+4+j*(n));
+	  c_5 = _mm_add_ps(c_5, _mm_mul_ps(a1, a2_1));
+	  
 	   
-	  c = _mm_loadu_ps(C+i+4+(j+1)*(n));
-	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_2));
-	  _mm_storeu_ps(C+i+4+(j+1)*(n), c);
+	  c_6 = _mm_loadu_ps(C+i+4+(j+1)*(n));
+	  c_6 = _mm_add_ps(c_6, _mm_mul_ps(a1, a2_2));
+	  _mm_storeu_ps(C+i+4+j*(n), c_5);
+	  _mm_storeu_ps(C+i+4+(j+1)*(n), c_6);
 	  
-	  c = _mm_loadu_ps(C+i+4+(j+2)*(n));
-	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_3));
-	  _mm_storeu_ps(C+i+4+(j+2)*(n), c);
+	  c_7 = _mm_loadu_ps(C+i+4+(j+2)*(n));
+	  c_7 = _mm_add_ps(c_7, _mm_mul_ps(a1, a2_3));
 	  
-	  c = _mm_loadu_ps(C+i+4+(j+3)*(n));
-	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_4));
-	  _mm_storeu_ps(C+i+4+(j+3)*(n), c);
+	  
+	  c_8 = _mm_loadu_ps(C+i+4+(j+3)*(n));
+	  c_8 = _mm_add_ps(c_8, _mm_mul_ps(a1, a2_4));
+	  _mm_storeu_ps(C+i+4+(j+2)*(n), c_7);
+	  _mm_storeu_ps(C+i+4+(j+3)*(n), c_8);
 	  
 	 }
 	  
       }
     }
 
-  } else { 
+  } else {
+    __m128 a2_1, a1, c;
+    register int k,j,i;
+    
+    int addRow = n - (n%STRIDE);
+    int addCol = d+n - ((d+n)%STRIDE);
+    int padRow = addRow + STRIDE;
+    int padCol = addCol + STRIDE;
+    int padSize = padRow * padCol;
+    float Apad[padSize];
+    
+    for(j = 0; j < n; j++){
+      memcpy((float*)(Apad + padRow*j), A + n*j, n*sizeof(float));
+      memset((float*)(Apad + padRow*j + n), 0, (padRow - n)*sizeof(float));
+    }
+    memset((float*)(Apad + padRow*j), 0, padRow*(padCol - (d+n))*sizeof(float));
+    
+    for( k = 0; k < m; k++ ){ 
+      for( j = 0; j < n; j++ ){
+	 a2_1 = _mm_load1_ps(Apad+j*(n+1)+k*(n));
+	 for( i = 0; i < n; i+=STRIDE ){
+	  
+	  a1 = _mm_loadu_ps(Apad+i+k*(n)); 
+	  
+	  c = _mm_loadu_ps(C+i+j*(n));
+	  c = _mm_add_ps(c, _mm_mul_ps(a1, a2_1));
+	  _mm_storeu_ps(C+i+j*(n), c);
+	 }
+      }
+    }
 
   }
 }
