@@ -92,7 +92,7 @@ void sgemm( int m, int n, int d, float *A, float *C )
     	for( j = 0; j < n; j+=2 ){
 	  		a2_1 = _mm_load1_ps(Apad+j*(padRow+1)+k*(padRow));
 	  		a2_2 = _mm_load1_ps(Apad+(j+1)*(padRow+1)+k*(padRow));
-		 		for( i = 0; i < n; i+=STRIDE ){
+		 	for( i = 0; i < n; i+=STRIDE ){
 	  
 	  			a1 = _mm_loadu_ps(Apad+i+k*(padRow)); 
 	  
